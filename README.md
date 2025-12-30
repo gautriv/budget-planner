@@ -50,6 +50,13 @@ Track expenses, set budgets, and achieve your savings goals with a world-class U
 - Mobile responsive
 - Smooth animations with Framer Motion
 
+### 📱 Progressive Web App (PWA)
+- **Install as App** — Works on desktop, Android, and iOS
+- **Offline-First** — All data stored locally in IndexedDB
+- **Works Without Server** — Use the app even when backend is offline
+- **Auto-Sync** — Syncs with server when online
+- **Sync Indicator** — Shows online/offline status and last sync time
+
 ---
 
 ## 🛠️ Tech Stack
@@ -58,7 +65,7 @@ Track expenses, set budgets, and achieve your savings goals with a world-class U
 |-------|------------|
 | **Frontend** | React 19, Tailwind CSS, Shadcn/UI, Recharts, Framer Motion |
 | **Backend** | FastAPI, Python 3.9+, Uvicorn |
-| **Database** | MongoDB |
+| **Database** | MongoDB (server), IndexedDB (local/offline) |
 | **Fonts** | Fraunces (headings), Manrope (body), JetBrains Mono (numbers) |
 
 ---

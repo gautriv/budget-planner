@@ -9,6 +9,7 @@ import Analytics from "@/pages/Analytics";
 import Settings from "@/pages/Settings";
 import SavingsGoals from "@/pages/SavingsGoals";
 import InstallPrompt from "@/components/InstallPrompt";
+import SyncStatus from "@/components/SyncStatus";
 import { 
   LayoutDashboard, 
   ArrowUpDown, 
@@ -101,15 +102,17 @@ function Navigation() {
           ))}
         </nav>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsDark(!isDark)}
-          data-testid="theme-toggle"
-          className="mt-auto self-start"
-        >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </Button>
+        <div className="mt-auto flex items-center gap-2">
+          <SyncStatus />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsDark(!isDark)}
+            data-testid="theme-toggle"
+          >
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
+        </div>
       </aside>
 
       {/* Mobile Header */}
@@ -118,7 +121,8 @@ function Navigation() {
           <h1 className="font-serif text-xl font-semibold">
             <span className="text-primary">Budget</span>Vault
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <SyncStatus />
             <Button
               variant="ghost"
               size="icon"
