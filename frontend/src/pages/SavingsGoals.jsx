@@ -21,12 +21,17 @@ import {
   CalendarIcon,
   Target,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  PiggyBank,
+  Wallet,
+  ArrowRight
 } from 'lucide-react';
-import { getSavingsGoals, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } from '@/lib/api';
+import { getSavingsGoals, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal, getTransactions } from '@/lib/api';
 import { formatCurrency, calculatePercentage, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+
+const SAVINGS_CATEGORY_ID = 'cat_savings';
 
 const GOAL_IMAGES = [
   { label: 'Vacation', url: 'https://images.unsplash.com/photo-1673964566152-2aee6bc89929?w=400&h=200&fit=crop' },
@@ -37,6 +42,7 @@ const GOAL_IMAGES = [
 
 export default function SavingsGoals() {
   const [goals, setGoals] = useState([]);
+  const [savingsTransactions, setSavingsTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogKey, setDialogKey] = useState(0);
@@ -61,15 +67,28 @@ export default function SavingsGoals() {
 
   const fetchData = async () => {
     try {
-      const res = await getSavingsGoals();
-      setGoals(res.data);
+      const [goalsRes, transactionsRes] = await Promise.all([
+        getSavingsGoals(),
+        getTransactions()
+      ]);
+      setGoals(goalsRes.data);
+      
+      // Filter savings transactions
+      const savings = transactionsRes.data.filter(t => t.category_id === SAVINGS_CATEGORY_ID);
+      setSavingsTransactions(savings);
     } catch (error) {
-      console.error('Error fetching goals:', error);
-      toast.error('Failed to fetch savings goals');
+      console.error('Error fetching data:', error);
+      toast.error('Failed to fetch savings data');
     } finally {
       setLoading(false);
     }
   };
+
+  // Calculate total savings from transactions
+  const totalSavingsFromTransactions = savingsTransactions.reduce((sum, t) => sum + t.amount, 0);
+  
+  // Calculate savings already in goals
+  const totalInGoals = goals.reduce((sum, g) => sum + g.current_amount, 0);
 
   const resetForm = () => {
     setFormData({
@@ -333,15 +352,89 @@ export default function SavingsGoals() {
         </Dialog>
       </div>
 
-      {/* Overall Progress */}
+      {/* Total Savings Summary - Always show if there are savings transactions */}
+      {totalSavingsFromTransactions > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 rounded-2xl bg-primary/20">
+                    <PiggyBank className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Savings (from transactions)</p>
+                    <p className="font-mono text-4xl font-bold text-primary">{formatCurrency(totalSavingsFromTransactions)}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {savingsTransactions.length} saving{savingsTransactions.length !== 1 ? 's' : ''} recorded
+                    </p>
+                  </div>
+                </div>
+                {goals.length === 0 && (
+                  <div className="sm:text-right">
+                    <p className="text-sm text-muted-foreground mb-2">Create goals to track your progress</p>
+                    <Button 
+                      onClick={() => {
+                        resetForm();
+                        setTimeout(() => setDialogOpen(true), 0);
+                      }}
+                      className="bg-primary text-primary-foreground gap-2"
+                    >
+                      <Target className="w-4 h-4" />
+                      Create First Goal
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              {/* Recent savings transactions */}
+              {savingsTransactions.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-primary/10">
+                  <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
+                    <Wallet className="w-3 h-3" />
+                    Recent Savings
+                  </p>
+                  <div className="space-y-2">
+                    {savingsTransactions.slice(0, 3).map((txn) => (
+                      <div key={txn.id} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-primary" />
+                          <span className="text-muted-foreground">{txn.description || 'Savings'}</span>
+                          <span className="text-xs text-muted-foreground/60">
+                            {format(new Date(txn.date), 'MMM d')}
+                          </span>
+                        </div>
+                        <span className="font-mono font-medium text-primary">
+                          +{formatCurrency(txn.amount)}
+                        </span>
+                      </div>
+                    ))}
+                    {savingsTransactions.length > 3 && (
+                      <p className="text-xs text-muted-foreground text-center pt-2">
+                        +{savingsTransactions.length - 3} more transactions
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+            <Sparkles className="absolute right-4 top-4 w-32 h-32 text-primary/5" />
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Overall Progress - Goals */}
       {goals.length > 0 && (
         <Card className="glass-card overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-sm text-muted-foreground">Total Savings Progress</p>
+                <p className="text-sm text-muted-foreground">Goals Progress</p>
                 <p className="font-mono text-3xl font-semibold">{formatCurrency(totalSaved)}</p>
-                <p className="text-sm text-muted-foreground">of {formatCurrency(totalTarget)} total</p>
+                <p className="text-sm text-muted-foreground">of {formatCurrency(totalTarget)} target</p>
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-2 text-primary">
@@ -472,13 +565,15 @@ export default function SavingsGoals() {
           })}
         </div>
       ) : (
-        <Card className="glass-card">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-            <Target className="w-16 h-16 mb-4 opacity-30" />
-            <p className="text-lg">No savings goals yet</p>
-            <p className="text-sm">Start saving towards your dreams</p>
-          </CardContent>
-        </Card>
+        totalSavingsFromTransactions === 0 && (
+          <Card className="glass-card">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <Target className="w-16 h-16 mb-4 opacity-30" />
+              <p className="text-lg">No savings goals yet</p>
+              <p className="text-sm">Start saving towards your dreams</p>
+            </CardContent>
+          </Card>
+        )
       )}
 
       {/* Add Amount Dialog */}
