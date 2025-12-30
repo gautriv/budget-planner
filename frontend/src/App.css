@@ -1,0 +1,87 @@
+/* App-specific styles */
+.balance-hero {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, transparent 50%);
+}
+
+.stat-card {
+    @apply glass-card rounded-2xl p-6;
+}
+
+.transaction-item {
+    @apply flex items-center justify-between p-4 rounded-xl hover:bg-secondary/30 transition-colors cursor-pointer;
+}
+
+.category-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium;
+}
+
+/* Chart container styles */
+.chart-container {
+    @apply w-full h-[300px];
+}
+
+/* Progress bar animations */
+.progress-fill {
+    transition: width 0.5s ease-out;
+}
+
+/* Number animation */
+@keyframes count-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-count {
+    animation: count-up 0.4s ease-out forwards;
+}
+
+/* Staggered animations for lists */
+.stagger-item {
+    opacity: 0;
+    animation: fade-in 0.4s ease-out forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+.stagger-item:nth-child(7) { animation-delay: 0.35s; }
+.stagger-item:nth-child(8) { animation-delay: 0.4s; }
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom focus styles */
+.focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+}
+
+/* Alert badge pulse */
+@keyframes pulse-alert {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.alert-pulse {
+    animation: pulse-alert 2s ease-in-out infinite;
+}
