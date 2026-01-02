@@ -1,0 +1,122 @@
+[
+  {
+    "id": "cat_food",
+    "name": "Food & Dining",
+    "icon": "utensils",
+    "color": "#10b981",
+    "type": "expense",
+    "is_default": true
+  },
+  {
+    "id": "cat_transport",
+    "name": "Transportation",
+    "icon": "car",
+    "color": "#3b82f6",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_entertainment",
+    "name": "Entertainment",
+    "icon": "gamepad-2",
+    "color": "#8b5cf6",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_bills",
+    "name": "Bills & Utilities",
+    "icon": "receipt",
+    "color": "#f59e0b",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_shopping",
+    "name": "Shopping",
+    "icon": "shopping-bag",
+    "color": "#ec4899",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_health",
+    "name": "Health",
+    "icon": "heart-pulse",
+    "color": "#ef4444",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_housing",
+    "name": "Housing",
+    "icon": "home",
+    "color": "#06b6d4",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_savings",
+    "name": "Savings",
+    "icon": "piggy-bank",
+    "color": "#22c55e",
+    "is_default": true,
+    "type": "expense"
+  },
+  {
+    "id": "cat_salary",
+    "name": "Salary",
+    "icon": "briefcase",
+    "color": "#10b981",
+    "is_default": true,
+    "type": "income"
+  },
+  {
+    "id": "cat_freelance",
+    "name": "Freelance",
+    "icon": "laptop",
+    "color": "#6366f1",
+    "is_default": true,
+    "type": "income"
+  },
+  {
+    "id": "cat_investment",
+    "name": "Investments",
+    "icon": "trending-up",
+    "color": "#14b8a6",
+    "is_default": true,
+    "type": "income"
+  },
+  {
+    "id": "cat_other_income",
+    "name": "Other Income",
+    "icon": "wallet",
+    "color": "#84cc16",
+    "is_default": true,
+    "type": "income"
+  },
+  {
+    "id": "cat_40d4f726",
+    "name": "Credit Card Bill",
+    "icon": "zap",
+    "color": "#3b82f6",
+    "type": "expense",
+    "is_default": false
+  },
+  {
+    "id": "cat_765a88f0",
+    "name": "Business Expense",
+    "icon": "target",
+    "color": "#10b981",
+    "type": "expense",
+    "is_default": false
+  },
+  {
+    "id": "cat_e044413e",
+    "name": "Bank Interest",
+    "icon": "baby",
+    "color": "#10b981",
+    "type": "income",
+    "is_default": false
+  }
+]

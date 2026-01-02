@@ -1,7 +1,6 @@
 from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
@@ -10,14 +9,122 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
+import json
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# File-based storage (persists data to JSON files)
+DATA_DIR = ROOT_DIR / 'data'
+DATA_DIR.mkdir(exist_ok=True)
+
+class FileDB:
+    """Simple file-based database that persists data to JSON files"""
+    
+    def __init__(self, data_dir: Path):
+        self.data_dir = data_dir
+        self.collections = {}
+    
+    def _get_file_path(self, collection: str) -> Path:
+        return self.data_dir / f"{collection}.json"
+    
+    def _load_collection(self, collection: str) -> List[dict]:
+        file_path = self._get_file_path(collection)
+        if file_path.exists():
+            try:
+                with open(file_path, 'r') as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                return []
+        return []
+    
+    def _save_collection(self, collection: str, data: List[dict]):
+        file_path = self._get_file_path(collection)
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    async def find(self, collection: str, query: dict = None) -> List[dict]:
+        data = self._load_collection(collection)
+        if not query:
+            return data
+        
+        # Simple query matching
+        results = []
+        for item in data:
+            match = True
+            for key, value in query.items():
+                if key == "$regex" or (isinstance(value, dict) and "$regex" in value):
+                    # Handle regex queries (simplified)
+                    continue
+                if isinstance(value, dict) and "$regex" in value:
+                    import re
+                    if not re.match(value["$regex"], str(item.get(key, ""))):
+                        match = False
+                        break
+                elif item.get(key) != value:
+                    match = False
+                    break
+            if match:
+                results.append(item)
+        return results
+    
+    async def find_with_regex(self, collection: str, field: str, pattern: str) -> List[dict]:
+        import re
+        data = self._load_collection(collection)
+        return [item for item in data if re.match(pattern, str(item.get(field, "")))]
+    
+    async def find_one(self, collection: str, query: dict) -> Optional[dict]:
+        results = await self.find(collection, query)
+        return results[0] if results else None
+    
+    async def insert_one(self, collection: str, document: dict):
+        data = self._load_collection(collection)
+        data.append(document)
+        self._save_collection(collection, data)
+    
+    async def insert_many(self, collection: str, documents: List[dict]):
+        data = self._load_collection(collection)
+        data.extend(documents)
+        self._save_collection(collection, data)
+    
+    async def update_one(self, collection: str, query: dict, update: dict):
+        data = self._load_collection(collection)
+        for i, item in enumerate(data):
+            match = all(item.get(k) == v for k, v in query.items())
+            if match:
+                if "$set" in update:
+                    data[i].update(update["$set"])
+                else:
+                    data[i].update(update)
+                self._save_collection(collection, data)
+                return True
+        return False
+    
+    async def find_one_and_update(self, collection: str, query: dict, update: dict) -> Optional[dict]:
+        data = self._load_collection(collection)
+        for i, item in enumerate(data):
+            match = all(item.get(k) == v for k, v in query.items())
+            if match:
+                if "$set" in update:
+                    data[i].update(update["$set"])
+                else:
+                    data[i].update(update)
+                self._save_collection(collection, data)
+                return data[i]
+        return None
+    
+    async def delete_one(self, collection: str, query: dict) -> bool:
+        data = self._load_collection(collection)
+        for i, item in enumerate(data):
+            match = all(item.get(k) == v for k, v in query.items())
+            if match:
+                data.pop(i)
+                self._save_collection(collection, data)
+                return True
+        return False
+
+# Initialize file-based database
+db = FileDB(DATA_DIR)
 
 # Create the main app
 app = FastAPI()
@@ -134,9 +241,9 @@ class SavingsGoalUpdate(BaseModel):
 
 # Initialize default categories
 async def init_categories():
-    existing = await db.categories.find_one({})
+    existing = await db.find_one("categories", {})
     if not existing:
-        await db.categories.insert_many(DEFAULT_CATEGORIES)
+        await db.insert_many("categories", DEFAULT_CATEGORIES)
 
 @app.on_event("startup")
 async def startup_event():
@@ -145,37 +252,47 @@ async def startup_event():
 # Category Endpoints
 @api_router.get("/categories", response_model=List[Category])
 async def get_categories():
-    categories = await db.categories.find({}, {"_id": 0}).to_list(100)
+    categories = await db.find("categories", {})
     return categories
 
 @api_router.post("/categories", response_model=Category)
 async def create_category(input: CategoryCreate):
     category = Category(**input.model_dump())
-    await db.categories.insert_one(category.model_dump())
+    await db.insert_one("categories", category.model_dump())
     return category
 
 @api_router.delete("/categories/{category_id}")
 async def delete_category(category_id: str):
-    result = await db.categories.delete_one({"id": category_id, "is_default": False})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Category not found or is a default category")
+    # Check if it's a default category
+    cat = await db.find_one("categories", {"id": category_id})
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if cat.get("is_default"):
+        raise HTTPException(status_code=400, detail="Cannot delete default category")
+    result = await db.delete_one("categories", {"id": category_id})
+    if not result:
+        raise HTTPException(status_code=404, detail="Category not found")
     return {"message": "Category deleted"}
 
 # Transaction Endpoints
 @api_router.get("/transactions", response_model=List[Transaction])
 async def get_transactions(month: Optional[str] = None, type: Optional[str] = None):
-    query = {}
     if month:
-        query["date"] = {"$regex": f"^{month}"}
+        transactions = await db.find_with_regex("transactions", "date", f"^{month}")
+    else:
+        transactions = await db.find("transactions", {})
+    
     if type:
-        query["type"] = type
-    transactions = await db.transactions.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+        transactions = [t for t in transactions if t.get("type") == type]
+    
+    # Sort by date descending
+    transactions.sort(key=lambda x: x.get("date", ""), reverse=True)
     return transactions
 
 @api_router.post("/transactions", response_model=Transaction)
 async def create_transaction(input: TransactionCreate):
     transaction = Transaction(**input.model_dump())
-    await db.transactions.insert_one(transaction.model_dump())
+    await db.insert_one("transactions", transaction.model_dump())
     return transaction
 
 @api_router.put("/transactions/{transaction_id}", response_model=Transaction)
@@ -184,49 +301,48 @@ async def update_transaction(transaction_id: str, input: TransactionUpdate):
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
     
-    result = await db.transactions.find_one_and_update(
+    result = await db.find_one_and_update(
+        "transactions",
         {"id": transaction_id},
-        {"$set": update_data},
-        return_document=True
+        {"$set": update_data}
     )
     if not result:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
-    result.pop("_id", None)
     return result
 
 @api_router.delete("/transactions/{transaction_id}")
 async def delete_transaction(transaction_id: str):
-    result = await db.transactions.delete_one({"id": transaction_id})
-    if result.deleted_count == 0:
+    result = await db.delete_one("transactions", {"id": transaction_id})
+    if not result:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return {"message": "Transaction deleted"}
 
 # Budget Endpoints
 @api_router.get("/budgets", response_model=List[Budget])
 async def get_budgets(month: Optional[str] = None):
-    query = {}
     if month:
-        query["month"] = month
-    budgets = await db.budgets.find(query, {"_id": 0}).to_list(100)
+        budgets = await db.find("budgets", {"month": month})
+    else:
+        budgets = await db.find("budgets", {})
     return budgets
 
 @api_router.post("/budgets", response_model=Budget)
 async def create_budget(input: BudgetCreate):
     # Check if budget already exists for this category and month
-    existing = await db.budgets.find_one({"category_id": input.category_id, "month": input.month})
+    existing = await db.find_one("budgets", {"category_id": input.category_id, "month": input.month})
     if existing:
         # Update existing budget
-        await db.budgets.update_one(
+        await db.update_one(
+            "budgets",
             {"category_id": input.category_id, "month": input.month},
             {"$set": {"limit": input.limit}}
         )
-        existing.pop("_id", None)
         existing["limit"] = input.limit
         return existing
     
     budget = Budget(**input.model_dump())
-    await db.budgets.insert_one(budget.model_dump())
+    await db.insert_one("budgets", budget.model_dump())
     return budget
 
 @api_router.put("/budgets/{budget_id}", response_model=Budget)
@@ -235,34 +351,33 @@ async def update_budget(budget_id: str, input: BudgetUpdate):
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
     
-    result = await db.budgets.find_one_and_update(
+    result = await db.find_one_and_update(
+        "budgets",
         {"id": budget_id},
-        {"$set": update_data},
-        return_document=True
+        {"$set": update_data}
     )
     if not result:
         raise HTTPException(status_code=404, detail="Budget not found")
     
-    result.pop("_id", None)
     return result
 
 @api_router.delete("/budgets/{budget_id}")
 async def delete_budget(budget_id: str):
-    result = await db.budgets.delete_one({"id": budget_id})
-    if result.deleted_count == 0:
+    result = await db.delete_one("budgets", {"id": budget_id})
+    if not result:
         raise HTTPException(status_code=404, detail="Budget not found")
     return {"message": "Budget deleted"}
 
 # Savings Goals Endpoints
 @api_router.get("/savings-goals", response_model=List[SavingsGoal])
 async def get_savings_goals():
-    goals = await db.savings_goals.find({}, {"_id": 0}).to_list(100)
+    goals = await db.find("savings_goals", {})
     return goals
 
 @api_router.post("/savings-goals", response_model=SavingsGoal)
 async def create_savings_goal(input: SavingsGoalCreate):
     goal = SavingsGoal(**input.model_dump())
-    await db.savings_goals.insert_one(goal.model_dump())
+    await db.insert_one("savings_goals", goal.model_dump())
     return goal
 
 @api_router.put("/savings-goals/{goal_id}", response_model=SavingsGoal)
@@ -271,21 +386,20 @@ async def update_savings_goal(goal_id: str, input: SavingsGoalUpdate):
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
     
-    result = await db.savings_goals.find_one_and_update(
+    result = await db.find_one_and_update(
+        "savings_goals",
         {"id": goal_id},
-        {"$set": update_data},
-        return_document=True
+        {"$set": update_data}
     )
     if not result:
         raise HTTPException(status_code=404, detail="Savings goal not found")
     
-    result.pop("_id", None)
     return result
 
 @api_router.delete("/savings-goals/{goal_id}")
 async def delete_savings_goal(goal_id: str):
-    result = await db.savings_goals.delete_one({"id": goal_id})
-    if result.deleted_count == 0:
+    result = await db.delete_one("savings_goals", {"id": goal_id})
+    if not result:
         raise HTTPException(status_code=404, detail="Savings goal not found")
     return {"message": "Savings goal deleted"}
 
@@ -293,10 +407,7 @@ async def delete_savings_goal(goal_id: str):
 @api_router.get("/dashboard/summary")
 async def get_dashboard_summary(month: str):
     # Get all transactions for the month
-    transactions = await db.transactions.find(
-        {"date": {"$regex": f"^{month}"}}, 
-        {"_id": 0}
-    ).to_list(1000)
+    transactions = await db.find_with_regex("transactions", "date", f"^{month}")
     
     total_income = sum(t["amount"] for t in transactions if t["type"] == "income")
     total_expenses = sum(t["amount"] for t in transactions if t["type"] == "expense")
@@ -310,7 +421,7 @@ async def get_dashboard_summary(month: str):
         spending_by_category[cat_id] = spending_by_category.get(cat_id, 0) + t["amount"]
     
     # Get budgets for the month
-    budgets = await db.budgets.find({"month": month}, {"_id": 0}).to_list(100)
+    budgets = await db.find("budgets", {"month": month})
     
     # Calculate budget alerts
     alerts = []
@@ -327,7 +438,7 @@ async def get_dashboard_summary(month: str):
             })
     
     # Get categories for mapping
-    categories = await db.categories.find({}, {"_id": 0}).to_list(100)
+    categories = await db.find("categories", {})
     category_map = {c["id"]: c for c in categories}
     
     # Prepare spending breakdown with category info
@@ -368,10 +479,7 @@ async def get_spending_trends(months: int = 6):
         target_date = today - relativedelta(months=i)
         month_str = target_date.strftime("%Y-%m")
         
-        transactions = await db.transactions.find(
-            {"date": {"$regex": f"^{month_str}"}}, 
-            {"_id": 0}
-        ).to_list(1000)
+        transactions = await db.find_with_regex("transactions", "date", f"^{month_str}")
         
         income = sum(t["amount"] for t in transactions if t["type"] == "income")
         expenses = sum(t["amount"] for t in transactions if t["type"] == "expense")
@@ -409,4 +517,5 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    # File-based DB doesn't need explicit closing
+    pass

@@ -343,34 +343,56 @@ export default function Analytics() {
             </CardHeader>
             <CardContent>
               {categorySpending.length > 0 ? (
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={categorySpending}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={2}
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        labelLine={false}
-                      >
-                        {categorySpending.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value) => formatCurrency(value)}
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '0.5rem',
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="h-[300px] flex">
+                  {/* Pie Chart */}
+                  <div className="flex-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={categorySpending}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={85}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {categorySpending.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value) => formatCurrency(value)}
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--card))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '0.5rem',
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Custom Legend */}
+                  <div className="w-40 flex flex-col justify-center space-y-2 pl-2">
+                    {categorySpending.map((entry, index) => {
+                      const total = categorySpending.reduce((sum, e) => sum + e.value, 0);
+                      const percent = ((entry.value / total) * 100).toFixed(0);
+                      return (
+                        <div key={index} className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-sm flex-shrink-0" 
+                            style={{ backgroundColor: entry.color }} 
+                          />
+                          <span className="text-xs text-muted-foreground truncate flex-1">
+                            {entry.name}
+                          </span>
+                          <span className="text-xs font-mono font-medium">
+                            {percent}%
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
