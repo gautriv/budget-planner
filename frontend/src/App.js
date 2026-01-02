@@ -104,14 +104,14 @@ function Navigation() {
 
         <div className="mt-auto flex items-center gap-2">
           <SyncStatus />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsDark(!isDark)}
-            data-testid="theme-toggle"
-          >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsDark(!isDark)}
+          data-testid="theme-toggle"
+        >
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </Button>
         </div>
       </aside>
 

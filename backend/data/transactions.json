@@ -1,0 +1,164 @@
+[
+  {
+    "id": "txn_87013e9f",
+    "amount": 176423.0,
+    "type": "income",
+    "category_id": "cat_salary",
+    "description": "",
+    "date": "2025-12-29",
+    "created_at": "2025-12-30T10:37:40.298829+00:00"
+  },
+  {
+    "id": "txn_2ff48451",
+    "amount": 2500.0,
+    "type": "expense",
+    "category_id": "cat_savings",
+    "description": "PPFAS Mutual Fund",
+    "date": "2025-12-30",
+    "created_at": "2025-12-30T10:55:20.173412+00:00"
+  },
+  {
+    "id": "txn_8f1698e8",
+    "amount": 5000.0,
+    "type": "expense",
+    "category_id": "cat_savings",
+    "description": "PPFAS Mutual Fund",
+    "date": "2025-12-30",
+    "created_at": "2025-12-30T10:55:32.872566+00:00"
+  },
+  {
+    "id": "txn_eb28bce8",
+    "amount": 70.0,
+    "type": "expense",
+    "category_id": "cat_food",
+    "description": "momfali",
+    "date": "2025-12-29",
+    "created_at": "2025-12-30T10:55:58.022207+00:00"
+  },
+  {
+    "id": "txn_94479e34",
+    "amount": 25.0,
+    "type": "expense",
+    "category_id": "cat_food",
+    "description": "upi mahalaxi general store",
+    "date": "2025-12-29",
+    "created_at": "2025-12-30T10:56:17.939008+00:00"
+  },
+  {
+    "id": "txn_3efa3447",
+    "amount": 1100.0,
+    "type": "expense",
+    "category_id": "cat_housing",
+    "description": "lda plot payment",
+    "date": "2025-12-29",
+    "created_at": "2025-12-30T10:56:59.821694+00:00"
+  },
+  {
+    "id": "txn_872590fd",
+    "amount": 450.0,
+    "type": "expense",
+    "category_id": "cat_765a88f0",
+    "description": "",
+    "date": "2025-12-31",
+    "created_at": "2026-01-02T08:53:04.549247+00:00"
+  },
+  {
+    "id": "txn_6fe2163b",
+    "amount": 461.0,
+    "type": "expense",
+    "category_id": "cat_transport",
+    "description": "",
+    "date": "2025-12-31",
+    "created_at": "2026-01-02T08:53:32.576548+00:00"
+  },
+  {
+    "id": "txn_edd87e00",
+    "amount": 350.0,
+    "type": "expense",
+    "category_id": "cat_health",
+    "description": "Mummy eye",
+    "date": "2025-12-31",
+    "created_at": "2026-01-02T08:54:07.851296+00:00"
+  },
+  {
+    "id": "txn_0dd99f66",
+    "amount": 166467.0,
+    "type": "income",
+    "category_id": "cat_salary",
+    "description": "",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T08:55:25.607830+00:00"
+  },
+  {
+    "id": "txn_163bd464",
+    "amount": 995.0,
+    "type": "income",
+    "category_id": "cat_e044413e",
+    "description": "",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T08:55:45.770945+00:00"
+  },
+  {
+    "id": "txn_5de32f24",
+    "amount": 30000.0,
+    "type": "expense",
+    "category_id": "cat_savings",
+    "description": "",
+    "date": "2026-01-02",
+    "created_at": "2026-01-02T08:56:03.962985+00:00"
+  },
+  {
+    "id": "txn_4159670a",
+    "amount": 29012.0,
+    "type": "expense",
+    "category_id": "cat_40d4f726",
+    "description": "",
+    "date": "2026-01-02",
+    "created_at": "2026-01-02T08:56:31.840936+00:00"
+  },
+  {
+    "id": "txn_a0d901e8",
+    "amount": 4500.0,
+    "type": "expense",
+    "category_id": "cat_765a88f0",
+    "description": "",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T08:58:58.707562+00:00"
+  },
+  {
+    "id": "txn_d03158c0",
+    "amount": 51706.72,
+    "type": "expense",
+    "category_id": "cat_40d4f726",
+    "description": "",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T08:59:30.489878+00:00"
+  },
+  {
+    "id": "txn_b8d522d4",
+    "amount": 2095.0,
+    "type": "expense",
+    "category_id": "cat_7516b2aa",
+    "description": "",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T09:00:31.422864+00:00"
+  },
+  {
+    "id": "txn_b62b5228",
+    "amount": 900.0,
+    "type": "expense",
+    "category_id": "cat_health",
+    "description": "Mummy eye",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T09:01:14.483164+00:00"
+  },
+  {
+    "id": "txn_a6ec9738",
+    "amount": 75.0,
+    "type": "expense",
+    "category_id": "cat_food",
+    "description": "Momfali",
+    "date": "2026-01-01",
+    "created_at": "2026-01-02T09:01:36.906093+00:00"
+  }
+]

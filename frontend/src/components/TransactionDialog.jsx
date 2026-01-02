@@ -138,7 +138,7 @@ export default function TransactionDialog({
         } else if (isSavingsCategory) {
           toast.success('Savings recorded');
         } else {
-          toast.success('Transaction added');
+        toast.success('Transaction added');
         }
       }
       
@@ -181,79 +181,79 @@ export default function TransactionDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
-            <DialogDescription>
-              {editingTransaction ? 'Modify your transaction details below.' : 'Enter the details for your new transaction.'}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            {/* Type Toggle */}
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                data-testid="type-expense-btn"
-                variant={formData.type === 'expense' ? 'default' : 'outline'}
-                className={cn("flex-1", formData.type === 'expense' && "bg-destructive hover:bg-destructive/90")}
-                onClick={() => setFormData({ ...formData, type: 'expense', category_id: '' })}
-              >
-                <ArrowDownRight className="w-4 h-4 mr-2" />
-                Expense
-              </Button>
-              <Button
-                type="button"
-                data-testid="type-income-btn"
-                variant={formData.type === 'income' ? 'default' : 'outline'}
-                className={cn("flex-1", formData.type === 'income' && "bg-primary hover:bg-primary/90")}
-                onClick={() => setFormData({ ...formData, type: 'income', category_id: '' })}
-              >
-                <ArrowUpRight className="w-4 h-4 mr-2" />
-                Income
-              </Button>
-            </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
+          <DialogDescription>
+            {editingTransaction ? 'Modify your transaction details below.' : 'Enter the details for your new transaction.'}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Type Toggle */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              data-testid="type-expense-btn"
+              variant={formData.type === 'expense' ? 'default' : 'outline'}
+              className={cn("flex-1", formData.type === 'expense' && "bg-destructive hover:bg-destructive/90")}
+              onClick={() => setFormData({ ...formData, type: 'expense', category_id: '' })}
+            >
+              <ArrowDownRight className="w-4 h-4 mr-2" />
+              Expense
+            </Button>
+            <Button
+              type="button"
+              data-testid="type-income-btn"
+              variant={formData.type === 'income' ? 'default' : 'outline'}
+              className={cn("flex-1", formData.type === 'income' && "bg-primary hover:bg-primary/90")}
+              onClick={() => setFormData({ ...formData, type: 'income', category_id: '' })}
+            >
+              <ArrowUpRight className="w-4 h-4 mr-2" />
+              Income
+            </Button>
+          </div>
 
-            {/* Amount */}
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                data-testid="amount-input"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="font-mono text-lg"
-                required
-              />
-            </div>
+          {/* Amount */}
+          <div className="space-y-2">
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              data-testid="amount-input"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              className="font-mono text-lg"
+              required
+            />
+          </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Select
-                value={formData.category_id}
-                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-              >
-                <SelectTrigger data-testid="category-select">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      <div className="flex items-center gap-2">
-                        <CategoryIcon name={cat.icon} className="w-4 h-4" style={{ color: cat.color }} />
-                        {cat.name}
+          {/* Category */}
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Select
+              value={formData.category_id}
+              onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+            >
+              <SelectTrigger data-testid="category-select">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    <div className="flex items-center gap-2">
+                      <CategoryIcon name={cat.icon} className="w-4 h-4" style={{ color: cat.color }} />
+                      {cat.name}
                         {cat.id === SAVINGS_CATEGORY_ID && (
                           <span className="ml-1 text-xs text-primary">• Links to Goals</span>
                         )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
               
               {/* Savings category hint */}
               {isSavingsCategory && formData.amount && (
@@ -262,68 +262,68 @@ export default function TransactionDialog({
                   <span>You'll be able to link this to a savings goal</span>
                 </div>
               )}
-            </div>
+          </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
-              <Input
-                id="description"
-                data-testid="description-input"
-                placeholder="What was this for?"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Description (optional)</Label>
+            <Input
+              id="description"
+              data-testid="description-input"
+              placeholder="What was this for?"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
 
-            {/* Date */}
-            <div className="space-y-2">
-              <Label>Date</Label>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    data-testid="date-picker-btn"
-                    className={cn("w-full justify-start text-left font-normal", !formData.date && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? format(formData.date, 'PPP') : 'Pick a date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) => {
-                      setFormData({ ...formData, date: date || new Date() });
-                      setDatePickerOpen(false);
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          {/* Date */}
+          <div className="space-y-2">
+            <Label>Date</Label>
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  data-testid="date-picker-btn"
+                  className={cn("w-full justify-start text-left font-normal", !formData.date && "text-muted-foreground")}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.date ? format(formData.date, 'PPP') : 'Pick a date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.date}
+                  onSelect={(date) => {
+                    setFormData({ ...formData, date: date || new Date() });
+                    setDatePickerOpen(false);
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-            <Button 
-              type="submit" 
-              data-testid="submit-transaction-btn" 
+          <Button 
+            type="submit" 
+            data-testid="submit-transaction-btn" 
               className={cn(
                 "w-full",
                 isSavingsCategory && formData.amount
                   ? "bg-primary text-primary-foreground"
                   : "btn-primary bg-primary text-primary-foreground"
               )}
-              disabled={isSubmitting}
-            >
+            disabled={isSubmitting}
+          >
               {isSubmitting ? 'Saving...' : (
                 isSavingsCategory && formData.amount && !editingTransaction
                   ? 'Continue → Select Goal'
                   : (editingTransaction ? 'Update Transaction' : 'Add Transaction')
               )}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
 
       {/* Savings Goal Selector */}
       <SavingsGoalSelector

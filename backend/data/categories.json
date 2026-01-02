@@ -118,5 +118,13 @@
     "color": "#10b981",
     "type": "income",
     "is_default": false
+  },
+  {
+    "id": "cat_7516b2aa",
+    "name": "Internet",
+    "icon": "wifi",
+    "color": "#f59e0b",
+    "type": "expense",
+    "is_default": false
   }
 ]

@@ -566,13 +566,13 @@ export default function SavingsGoals() {
         </div>
       ) : (
         totalSavingsFromTransactions === 0 && (
-          <Card className="glass-card">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <Target className="w-16 h-16 mb-4 opacity-30" />
-              <p className="text-lg">No savings goals yet</p>
-              <p className="text-sm">Start saving towards your dreams</p>
-            </CardContent>
-          </Card>
+        <Card className="glass-card">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <Target className="w-16 h-16 mb-4 opacity-30" />
+            <p className="text-lg">No savings goals yet</p>
+            <p className="text-sm">Start saving towards your dreams</p>
+          </CardContent>
+        </Card>
         )
       )}
 
